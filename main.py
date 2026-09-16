@@ -60,7 +60,7 @@ try:
     
     # 그래프 1 설명 및 인사이트 구역
     with st.container():
-        st.info("💡 **이 그래프로 알 수 있는 것:** 각 장르별 영화가 얼마나 나왔는지 알 수 있다.")
+        st.info("💡 **이 그래프로 알 수 있는 것:** 1번 각 장르별 영화가 얼마나 나왔는지 알 수 있다.")
     
     st.markdown("---")
     
@@ -87,7 +87,7 @@ try:
     
     # 그래프 2 설명 및 인사이트 구역
     with st.container():
-        st.info("💡 **이 그래프로 알 수 있는 것:** 각 장르별 어떤 영화가 흥행했는지 한눈에 볼 수가 있다.")
+        st.info("💡 **이 그래프로 알 수 있는 것:** 2번 각 장르별 어떤 영화가 흥행했는지 한눈에 볼 수가 있다.")
 
     st.markdown("---")
 
@@ -126,12 +126,12 @@ try:
     st.markdown(f"📌 **관객수 구간 분석:** 박스오피스 상위권 영화 중에서도 **약 {under_1m_pct:.1f}%의 영화가 100만 명 미만 구간**에 집중되어 있습니다. 가장 많은 관객을 동원한 영화는 **'{top_movie['movieNm']}'**(약 {top_movie['total_audi']:,.0f}명)입니다.")
     
     with st.container():
-        st.info("💡 **이 그래프로 알 수 있는 것:** 어떤 영화가 많이 흥행하고 어떤 영화를 많이 안 흥행하는지 알 수가 있다.")
+        st.info("💡 **이 그래프로 알 수 있는 것:** 3번 어떤 영화가 많이 흥행하고 어떤 영화를 많이 안 흥행하는지 알 수가 있다.")
 
     st.markdown("---")
 
     # ---------------------------------------------------------
-    # 4. 개봉일 스크린수 vs 총 관객수 산점도
+    # 4. 개봉일 스크린수 vs 총 관객수 (산점도)
     # ---------------------------------------------------------
     st.subheader("4. 개봉일 스크린수와 총 관객수의 관계 (산점도)")
     
@@ -169,7 +169,7 @@ try:
 
     # 그래프 4 설명 및 인사이트 구역
     with st.container():
-        st.info("💡 **이 그래프로 알 수 있는 것:** 장르별 색으로 어떤 영화가 개봉일 후 흥행했는지 위치별로 알 수가 있다.")
+        st.info("💡 **이 그래프로 알 수 있는 것:** 4번 장르별 색으로 어떤 영화가 개봉일 후 흥행했는지 알 수가 있다 위치별로")
 
     st.markdown("---")
 
@@ -212,7 +212,7 @@ try:
 
     # 그래프 5 설명 및 인사이트 구역
     with st.container():
-        st.info("💡 **이 그래프로 알 수 있는 것:** 각 장르별 초대박 흥행작이 있는지 없는지 흥행했다면 얼마나 흥행했는지 알 수가 있다.")
+        st.info("💡 **이 그래프로 알 수 있는 것:** 5번 각 장르별 초대박 흥행작이 있는지 없는지 흥행했다면 얼마나 흥행했는지 알 수가 있다.")
 
     st.markdown("---")
 
@@ -259,7 +259,7 @@ try:
 
     # 그래프 6 설명 및 인사이트 구역
     with st.container():
-        st.info("💡 **이 그래프로 알 수 있는 것:** 버블의 크기로 각 장르별 영화가 얼마나 흥행했는지 알 수가 있다.")
+        st.info("💡 **이 그래프로 알 수 있는 것:** 6번 버블의 크기로 각 장르별 영화가 얼마나 흥행했는지 알 수가 있다.")
 
     st.markdown("---")
 
@@ -288,42 +288,50 @@ try:
 
     # 그래프 7 설명 및 인사이트 구역
     with st.container():
-        st.info("💡 **이 그래프로 알 수 있는 것:** 각 장르별로 어떤 나라가 많이 냈는지 알 수가 있다.")
+        st.info("💡 **이 그래프로 알 수 있는 것:** 7번 각 장르별로 어떤 나라가 많이 냈는지 알 수가 있다.")
 
     st.markdown("---")
 
     # ---------------------------------------------------------
-    # 8. 개봉 첫 주 관객수 vs 총 관객수 산점도
+    # 8. 개봉 첫 주 관객수 구간별 평균 총 관객수 (그룹 막대 그래프)
     # ---------------------------------------------------------
-    st.subheader("8. 개봉 첫 주 관객수와 총 관객수의 관계 (산점도)")
+    st.subheader("8. 개봉 첫 주 관객수 구간별 평균 총 관객수 (막대 그래프)")
     
-    # Plotly 산점도 생성 (장르별 색상 구분)
-    fig8 = px.scatter(
-        df,
-        x='first_week_audi',
-        y='total_audi',
-        color='genre',
-        hover_name='movieNm',
-        title="개봉 첫 주 관객수 vs 총 관객수",
+    # 개봉 첫 주 관객수 구간(Bin) 생성
+    bins = [0, 100000, 500000, 1000000, 3000000, 10000000]
+    labels = ['10만 미만', '10만~50만', '50만~100만', '100만~300만', '300만 이상']
+    
+    df_first_week = df.copy()
+    df_first_week['first_week_group'] = pd.cut(df_first_week['first_week_audi'], bins=bins, labels=labels, right=False)
+    
+    # 첫 주 관객수 구간별 평균 총 관객수 및 영화 수 집계
+    first_week_summary = df_first_week.groupby('first_week_group', observed=False).agg(
+        avg_total_audi=('total_audi', 'mean'),
+        movie_count=('movieNm', 'count')
+    ).reset_index()
+    
+    fig8 = px.bar(
+        first_week_summary,
+        x='first_week_group',
+        y='avg_total_audi',
+        color='first_week_group',
+        text_auto='.2s',
+        title="개봉 첫 주 관객수 구간별 평균 최종 총 관객수",
         labels={
-            'first_week_audi': '개봉 첫 주 관객수(명)',
-            'total_audi': '총 관객수(명)',
-            'genre': '장르'
+            'first_week_group': '개봉 첫 주 관객수 구간',
+            'avg_total_audi': '평균 총 관객수(명)',
+            'movie_count': '영화 편수'
         },
-        hover_data={
-            'first_week_audi': ':,d',
-            'total_audi': ':,d',
-            'genre': True
-        }
+        hover_data=['movie_count']
     )
     
     fig8.update_traces(
-        marker=dict(size=9, opacity=0.8),
-        hovertemplate="<b>%{hovertext}</b><br>장르: %{customdata[2]}<br>개봉 첫 주 관객: %{x:,}명<br>총 관객수: %{y:,}명"
+        hovertemplate="<b>첫 주 관객 구간:</b> %{x}<br><b>평균 총 관객수:</b> %{y:,.0f}명<br><b>영화 수:</b> %{customdata[0]}편"
     )
     fig8.update_layout(
-        xaxis_title="개봉 첫 주 관객수(명)",
-        yaxis_title="총 관객수(명)",
+        xaxis_title="개봉 첫 주 관객수 구간",
+        yaxis_title="평균 총 관객수(명)",
+        showlegend=False,
         margin=dict(t=50, b=20, l=20, r=20)
     )
     
@@ -331,7 +339,7 @@ try:
 
     # 그래프 8 설명 및 인사이트 구역
     with st.container():
-        st.info("💡 **이 그래프로 알 수 있는 것:** 개봉 첫 주 관객수가 많은 영화일수록 총 관객수도 많은지 두 변수 사이의 양(+)의 비례 관계와 장르별 흥행 차이를 알 수가 있다.")
+        st.info("💡 **이 그래프로 알 수 있는 것:** 개봉 첫 주에 들어온 관객 수 구간에 따라 최종 평균 총 관객수가 얼마나 차이나는지 직관적인 막대의 높이로 비교해 알 수가 있다.")
 
 except Exception as e:
     st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
