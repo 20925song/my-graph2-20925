@@ -131,45 +131,37 @@ try:
     st.markdown("---")
 
     # ---------------------------------------------------------
-    # 4. 개봉일 스크린수 구간별 평균 총 관객수 (막대 그래프로 차별화)
+    # 4. 개봉일 스크린수 vs 총 관객수 (복원된 산점도)
     # ---------------------------------------------------------
-    st.subheader("4. 개봉일 스크린수 구간별 평균 총 관객수 (막대 그래프)")
+    st.subheader("4. 개봉일 스크린수와 총 관객수의 관계 (산점도)")
     
-    # 스크린수 구간 생성
-    bins = [0, 300, 600, 900, 1200, 1500, 3000]
-    labels = ['300개 미만', '300~600개', '600~900개', '900~1200개', '1200~1500개', '1500개 이상']
-    
-    df_scrn = df.copy()
-    df_scrn['scrn_group'] = pd.cut(df_scrn['first_scrn'], bins=bins, labels=labels, right=False)
-    
-    # 구간별 평균 및 영화 수 집계
-    scrn_summary = df_scrn.groupby('scrn_group', observed=False).agg(
-        avg_total_audi=('total_audi', 'mean'),
-        movie_count=('movieNm', 'count')
-    ).reset_index()
-    
-    fig4 = px.bar(
-        scrn_summary,
-        x='scrn_group',
-        y='avg_total_audi',
-        color='scrn_group',
-        text_auto='.2s',
-        title="개봉일 스크린수 구간에 따른 평균 총 관객수 비교",
+    # Plotly 산점도 생성
+    fig4 = px.scatter(
+        df,
+        x='first_scrn',
+        y='total_audi',
+        color='genre',
+        hover_name='movieNm',
+        title="개봉일 스크린수 vs 총 관객수",
         labels={
-            'scrn_group': '개봉일 스크린수 구간',
-            'avg_total_audi': '평균 총 관객수(명)',
-            'movie_count': '영화 편수'
+            'first_scrn': '개봉일 스크린수(개)',
+            'total_audi': '총 관객수(명)',
+            'genre': '장르'
         },
-        hover_data=['movie_count']
+        hover_data={
+            'first_scrn': ':,d',
+            'total_audi': ':,d',
+            'genre': True
+        }
     )
     
     fig4.update_traces(
-        hovertemplate="<b>스크린수 구간:</b> %{x}<br><b>평균 총 관객수:</b> %{y:,.0f}명<br><b>해당 구간 영화 수:</b> %{customdata[0]}편"
+        marker=dict(size=9, opacity=0.8),
+        hovertemplate="<b>%{hovertext}</b><br>장르: %{customdata[2]}<br>개봉일 스크린수: %{x:,}개<br>총 관객수: %{y:,}명"
     )
     fig4.update_layout(
-        xaxis_title="개봉일 스크린수 구간",
-        yaxis_title="평균 총 관객수(명)",
-        showlegend=False,
+        xaxis_title="개봉일 스크린수(개)",
+        yaxis_title="총 관객수(명)",
         margin=dict(t=50, b=20, l=20, r=20)
     )
     
@@ -177,7 +169,7 @@ try:
 
     # 그래프 4 설명 및 인사이트 구역
     with st.container():
-        st.info("💡 **이 그래프로 알 수 있는 것:** 개봉 당일 확보한 스크린수가 900개 이상, 1200개 이상 등 상위 구간으로 올라갈수록 평균 총 관객수가 비약적으로 상승함을 명확한 구간별 비교로 확인할 수 있습니다.")
+        st.info("💡 **이 그래프로 알 수 있는 것:** 개봉일 스크린수가 확보될수록 총 관객수도 증가하는 양(+)의 상관관계를 보이지만, 스크린수가 적음에도 입소문을 통해 높은 총 관객수를 달성한 '알짜배기 흥행작'이나 반대로 높은 스크린수 대비 아쉬운 성적을 거둔 작품의 위치를 장르별 색상으로 쉽게 비교 및 파악할 수 있습니다.")
 
     st.markdown("---")
 
@@ -301,33 +293,28 @@ try:
     st.markdown("---")
 
     # ---------------------------------------------------------
-    # 8. 개봉 첫 주 관객수 vs 총 관객수 상세 산점도 (개별 영화 분석용)
+    # 8. 개봉 첫 주 관객수 vs 총 관객수 밀도 분포 (2D 히트맵)
     # ---------------------------------------------------------
-    st.subheader("8. 개봉 첫 주 관객수와 총 관객수의 관계 (산점도)")
+    st.subheader("8. 개봉 첫 주 관객수와 총 관객수의 밀도 분포 (2D 밀도 히트맵)")
     
-    # Plotly 산점도 생성
-    fig8 = px.scatter(
+    # Plotly 2D 밀도 히트맵 생성
+    fig8 = px.density_heatmap(
         df,
         x='first_week_audi',
         y='total_audi',
-        color='genre',
-        hover_name='movieNm',
-        title="개봉 첫 주 관객수 vs 총 관객수 (장르별 분포)",
+        nbinsx=20,
+        nbinsy=20,
+        color_continuous_scale='Viridis',
+        title="개봉 첫 주 관객수 vs 총 관객수 2D 밀도 히트맵 (진한 색 = 영화 밀집 구간)",
         labels={
             'first_week_audi': '개봉 첫 주 관객수(명)',
             'total_audi': '총 관객수(명)',
-            'genre': '장르'
-        },
-        hover_data={
-            'first_week_audi': ':,d',
-            'total_audi': ':,d',
-            'genre': True
+            'count': '영화 수'
         }
     )
     
     fig8.update_traces(
-        marker=dict(size=9, opacity=0.8),
-        hovertemplate="<b>%{hovertext}</b><br>장르: %{customdata[2]}<br>개봉 첫 주 관객: %{x:,}명<br>총 관객수: %{y:,}명"
+        hovertemplate="<b>첫 주 관객 구간:</b> %{x}명대<br><b>총 관객 구간:</b> %{y}명대<br><b>해당 구간 영화 수:</b> %{z}편"
     )
     fig8.update_layout(
         xaxis_title="개봉 첫 주 관객수(명)",
@@ -339,7 +326,7 @@ try:
 
     # 그래프 8 설명 및 인사이트 구역
     with st.container():
-        st.info("💡 **이 그래프로 알 수 있는 것:** 개봉 첫 주 관객수와 총 관객수는 뚜렷한 **양(+)의 상관관계**를 보입니다. 개봉 첫 주에 관객을 많이 동원할수록 최종 흥행 성적이 높아지는 일직선 형태의 비례 관계가 나타나며, 수직으로 높게 치솟은 점들은 초반 대비 입소문으로 뒷심을 발휘한 영화들입니다.")
+        st.info("💡 **이 그래프로 알 수 있는 것:** 개봉 첫 주 관객수와 총 관객수의 상관관계를 개별 점이 아닌 '밀도(영화 편수)' 차원에서 파악할 수 있습니다. 대부분의 영화가 좌측 하단(첫 주 및 총 관객수가 모두 적은 구간)에 집중되어 있으며, 오른쪽 위로 갈수록 밀도가 낮아지는 전형적인 흥행 양극화 밀도 패턴을 보여줍니다.")
 
 except Exception as e:
     st.error(f"데이터를 불러오는 중 오류가 발생했습니다: {e}")
